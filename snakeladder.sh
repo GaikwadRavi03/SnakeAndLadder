@@ -6,6 +6,7 @@ NUMBER=0
 LADDER=1
 SNAKE=2
 position=0
+diceCount=0
 
 die=$((RANDOM%6+1))
 echo $die
@@ -15,6 +16,7 @@ function gameplay() {
 	do
 		die=$((RANDOM%6+1))
 		random=$((RANDOM%3))	
+		diceCount=$(($diceCount+$die))
 		case $random in 
 			$NUMBER )
 			position=$(($position + $NUMBER));;
@@ -43,3 +45,4 @@ function gameplay() {
 }
 gameplay
 echo "position : $position"
+echo "dice count : $diceCount"
