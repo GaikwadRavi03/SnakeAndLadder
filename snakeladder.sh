@@ -1,104 +1,88 @@
 #!/bin/bash
 echo "snake and ladder game"
 
+FINALPOSITION=100
+INITIALPOSITION=0
 PLAYER=2
 NOPLAY=0
 LADDER=1
 SNAKE=2
-position1=0
-position2=0
+position=0
 diceCount=0
+player1Position=0
+player2Position=0
+
 
 function gameplay() {
-	while ! [[ $position1 -eq 100 || $position2 -eq 100 ]]
+	while [[ $player1Position -le $FINALPOSITION && $player2Position -le $FINALPOSITION ]]
 	do
+		endTheGame=0
 		for(( i=1; i<=$PLAYER; i++))
 		do
 			if [ $i -eq 1 ]
 			then
-				die=$((RANDOM%6+1))
-				random=$((RANDOM%3))  
-				diceCount=$(($diceCount+$die))
-				case $random in 
-				$NOPLAY )
-					position1=$(($position1 + $NOPLAY));;
-				$LADDER )
-					position1=$(($position1 + $die))
-					while [ $random -eq $LADDER ]
-					do
-						random=$((RANDOM%3)) 
-						echo position1 -->> $position2
-						echo "ladder player 1"
-						diece1=$((RANDOM%6+1))
-				       		position1=$(($position1 + $diece1))
-					done	
-				;;
-				$SNAKE )
-					position1=$(($position1 - $die));;
-				esac
-				echo position1 : $position1
-				
-				if [ $position1 -gt 100 ]
-				then 
-					position1=$(($position1-$die))
+				player1Position=$( playPlayerChance $player1Position )
+				if [ $player1Position -eq $FINALPOSITION ]
+				then
+					echo "player $1 win"
+					endTheGame=1
+					break
 				fi
-    
-				if [ $position1 -eq 100 ]
-				then 
-					echo $i "player win"
-				break
-				fi    
-    
-				if [ $position1 -lt 0 ]
-				then 
-					position1=0
-				fi
-			fi
-
-			if [ $i -eq 2 ]
+			elif [ $i -eq 2 ]
 			then
-				die=$((RANDOM%6+1))
-				random=$((RANDOM%3))  
-				diceCount=$(($diceCount+$die))
-				case $random in 
-				$NOPLAY )
-					position2=$(($position2 + $NOPLAY));;
-				$LADDER )
-					position2=$(($position2 + $die))
-					while [ $random -eq $LADDER ]
-					do
-						random=$((RANDOM%3)) 
-						echo position2 -->> $position2
-						echo "ladder player 2"
-						diece2=$((RANDOM%6+1))
-				       		position2=$(($position2 + $diece2))
-					done	
-				;;
-				$SNAKE )
-			        	position2=$(($position2 - $die));;
-				esac
-					echo position2 : $position2
-				
-				if [ $position2 -gt 100 ]
-			        then 
-				        position2=$(($position2-$die))
-        			fi
-    
-        			if [ $position2 -eq 100 ]
-        			then 
-         				echo $i "player win"
-         				break
-        			fi    
-    
-			        if [ $position2 -lt 0 ]
-        			then 
-          				position2=0
-        			fi
+				player2Position=$( playPlayerChance $player2Position )
+				if [ $player2Position -eq $FINALPOSITION ]
+				then
+					echo "player $2 win"
+					endTheGame=1
+					break
+				fi
       			fi
 		done
+		if [ $endTheGame -eq 1 ]
+		then
+			break
+		fi
 	done
 }
+
+
+function playPlayerChance(){
+	diece1=0
+	position=$1
+	die=$((RANDOM%6+1))
+	random=$((RANDOM%3))
+	((diceCount++))
+		case $random in
+		$NOPLAY )
+			position=$(($position + $NOPLAY));;
+		$LADDER )
+			position=$(($position + $die))
+			while [[ $random -eq $LADDER ]] 
+			do
+				random=$((RANDOM%3))
+				diece1=$((RANDOM%6+1))
+				if [[ $(($position+$diece1)) -le $FINALPOSITION ]]
+				then
+		       			position=$(($position + $diece1))
+				else
+					break
+				fi
+			done
+		;;
+		$SNAKE )
+			position=$(($position - $die));;
+		esac
+
+		if [ $position -gt $FINALPOSITION ]
+		then 
+			position=$(($position-$die))
+		elif [ $position -lt $INITIALPOSITION ]
+		then 
+			position=$INITIALPOSITION
+		fi
+			echo $position
+}
+
 gameplay
 
-echo "position : $position"
-echo "dice count : $diceCount"
